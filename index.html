@@ -26,11 +26,7 @@
       --radius: 10px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-main);
@@ -81,6 +77,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .badge {
@@ -101,7 +98,7 @@
     .badge-accent { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
     .badge-purple { background: var(--purple-bg); color: #c084fc; border-color: rgba(192, 132, 252, 0.3); }
 
-    /* MENU DE CASOS QUEMADOS */
+    /* CASOS QUEMADOS */
     .menu-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -148,11 +145,7 @@
       gap: 6px;
     }
 
-    .case-btn:hover {
-      border-color: var(--accent);
-      background: #3b4d66;
-    }
-
+    .case-btn:hover { border-color: var(--accent); background: #3b4d66; }
     .case-btn.active {
       border-color: var(--accent);
       background: rgba(56, 189, 248, 0.12);
@@ -182,9 +175,7 @@
     }
 
     @media (max-width: 900px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
     }
 
     .card {
@@ -213,10 +204,7 @@
       gap: 8px;
     }
 
-    .form-row {
-      display: flex;
-      gap: 10px;
-    }
+    .form-row { display: flex; gap: 10px; }
 
     input[type="text"], select {
       background: var(--bg-main);
@@ -231,9 +219,7 @@
       width: 100%;
     }
 
-    input[type="text"]:focus, select:focus {
-      border-color: var(--accent);
-    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
 
     .btn {
       background: var(--accent);
@@ -261,6 +247,16 @@
     }
     .btn-secondary:hover { background: #475569; }
 
+    .btn-restore {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+    .btn-restore:hover {
+      background: #f59e0b;
+      color: #0f172a;
+    }
+
     .btn-probar {
       background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
       color: #042f2e;
@@ -275,13 +271,7 @@
       color: #fff;
     }
 
-    /* EVIDENCIA CHIPS */
-    .chips-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
+    .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 
     .chip {
       background: var(--bg-card-sub);
@@ -332,9 +322,7 @@
       z-index: 2;
     }
 
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
     .mono { font-family: var(--font-mono); }
     .val-box {
@@ -429,6 +417,28 @@
       font-weight: bold;
     }
 
+    .tab-header {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover { color: #fff; background: var(--bg-card-sub); }
+    .tab-btn.active { color: #fff; background: var(--bg-card-sub); border-color: var(--border); }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -448,7 +458,10 @@
     <div class="badge-bar">
       <span class="badge badge-accent" id="badge-variables">8 Variables</span>
       <span class="badge badge-purple" id="badge-clausulas">14 Cláusulas CNF</span>
-      <span class="badge badge-warning" id="badge-consistencia">Esperando consulta</span>
+      <span class="badge" id="badge-origen-datos" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;">Base en disco</span>
+      <input type="file" id="input-archivo-base" accept=".json" style="display:none;" onchange="cargarJsonDesdeInput(event)">
+      <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" onclick="recargarDesdeArchivos(true)" title="Recarga los cambios de base_conocimiento.json desde disco">🔄 Recargar JSON</button>
+      <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" onclick="document.getElementById('input-archivo-base').click()" title="Seleccionar directamente un archivo JSON desde el explorador de archivos">📂 Seleccionar JSON</button>
     </div>
   </header>
 
@@ -456,49 +469,13 @@
   <div class="menu-card">
     <div class="menu-header">
       <h2>📋 Casos de prueba quemados</h2>
-      <button class="btn btn-secondary" onclick="restablecerBaseOriginal()">🔄 Restablecer Base Original</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-restore" onclick="restablecerBaseOriginal()">🔄 Restablecer base a la original</button>
+      </div>
     </div>
 
-    <div class="case-selector">
-      <div class="case-btn active" id="btn-caso-1" onclick="seleccionarCaso('caso_1')">
-        <div class="case-btn-title">
-          <span>Caso 1: Única Explicación</span>
-          <span class="badge badge-success">1 Modelo</span>
-        </div>
-        <div class="case-btn-desc">Evidencia: A, AD, AE. Determina a Fabián como responsable demostrado.</div>
-      </div>
-
-      <div class="case-btn" id="btn-caso-2" onclick="seleccionarCaso('caso_2')">
-        <div class="case-btn-title">
-          <span>Caso 2: Múltiples Explicaciones</span>
-          <span class="badge badge-warning">10 Modelos</span>
-        </div>
-        <div class="case-btn-desc">Sin evidencia adicional. Indeterminación entre Elena y Fabián (2 posibles soluciones).</div>
-      </div>
-
-      <div class="case-btn" id="btn-caso-3" onclick="seleccionarCaso('caso_3')">
-        <div class="case-btn-title">
-          <span>Caso 3: Contradictorio</span>
-          <span class="badge badge-danger">0 Modelos (□)</span>
-        </div>
-        <div class="case-btn-desc">Evidencia: K y A. Se genera contradicción directa (cláusula vacía) con A → ~K.</div>
-      </div>
-
-      <div class="case-btn" id="btn-caso-4" onclick="seleccionarCaso('caso_4')">
-        <div class="case-btn-title">
-          <span>Caso 4: Nueva Evidencia</span>
-          <span class="badge badge-success">2 Modelos</span>
-        </div>
-        <div class="case-btn-desc">Evidencia: K. El uso de la llave determina a Elena como culpable única.</div>
-      </div>
-
-      <div class="case-btn" id="btn-caso-custom" onclick="seleccionarCaso('custom')">
-        <div class="case-btn-title">
-          <span>Modo Personalizado</span>
-          <span class="badge badge-purple">Dinámico</span>
-        </div>
-        <div class="case-btn-desc">Permite añadir sospechosos, reglas proposicionales y evidencia en tiempo real.</div>
-      </div>
+    <div class="case-selector" id="contenedor-casos-quemados">
+      <!-- Generado dinámicamente o predeterminado -->
     </div>
   </div>
 
@@ -536,7 +513,7 @@
           <input type="text" id="input-regla-formula" placeholder="Fórmula: ej: G -> K  o  ~K | G" class="mono">
           <button class="btn" onclick="agregarReglaClick()">➕ Añadir</button>
         </div>
-        <div style="display: flex; gap: 6px; margin-top: 6px;">
+        <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
           <span style="font-size: 0.75rem; color: var(--text-muted);">Símbolos rápidos:</span>
           <button class="chip" onclick="insertarSimbolo('~')">~</button>
           <button class="chip" onclick="insertarSimbolo('&')">&</button>
@@ -572,13 +549,58 @@
         <label style="font-size: 0.85rem; font-weight: 600; color: var(--accent);">🎯 Consulta a evaluar e inferir:</label>
         <div class="form-row" style="margin-top: 6px;">
           <select id="select-consulta" onchange="seleccionarConsultaDeSelect()" style="max-width: 170px;"></select>
-          <input type="text" id="input-consulta-custom" placeholder="o escribe: D, ~N -> E, E | F" class="mono">
+          <input type="text" id="input-consulta-custom" placeholder="o escribe: D, A, K, ~N -> E" class="mono">
           <button class="btn btn-probar" id="btn-probar" onclick="ejecutarConsulta()">▶ Probar</button>
         </div>
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">
-          Haga clic en <strong>▶ Probar</strong> para calcular la resolución por enumeración, refutación proposicional y revelar el veredicto del culpable.
+          Haga clic en <strong>▶ Probar</strong> para calcular la resolución por enumeración, refutación proposicional y revelar el veredicto específico de la variable consultada.
         </p>
       </div>
+    </div>
+  </div>
+
+  <!-- DICCIONARIO COMPLETO: SIGNIFICADO DE VARIABLES Y REGLAS (INCLUYENDO LAS AÑADIDAS) -->
+  <div class="card">
+    <div class="card-header">
+      <h3>📚 Diccionario de Variables y Reglas en la Base de Conocimiento</h3>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" onclick="recargarDesdeArchivos(true)" title="Recarga los cambios de base_conocimiento.json">🔄 Recargar JSON</button>
+        <div class="tab-header" style="border-bottom: none; padding-bottom: 0;">
+          <button class="tab-btn active" id="tab-btn-vars" onclick="cambiarTabDiccionario('vars')">Variables y Significados</button>
+          <button class="tab-btn" id="tab-btn-reglas" onclick="cambiarTabDiccionario('reglas')">Reglas de la Base</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña 1: Variables -->
+    <div id="tab-contenido-vars" class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 80px;">Variable</th>
+            <th>Significado / Descripción</th>
+            <th style="width: 160px;">Categoría / Rol</th>
+            <th style="width: 110px;">Origen</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-variables-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Pestaña 2: Reglas -->
+    <div id="tab-contenido-reglas" class="table-wrapper" style="display: none;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">ID</th>
+            <th>Descripción</th>
+            <th>Fórmula Proposicional</th>
+            <th>Cláusulas FNC</th>
+            <th style="width: 110px;">Origen</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-reglas-body"></tbody>
+      </table>
     </div>
   </div>
 
@@ -595,13 +617,11 @@
       </div>
     </div>
 
-    <!-- Resultados de Consultas por Enumeración -->
     <div>
       <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--text-muted);">Clasificación de Enunciados en los Modelos Compatibles:</h4>
       <div id="enum-consultas-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px;"></div>
     </div>
 
-    <!-- Tabla de Modelos -->
     <div class="table-wrapper">
       <table id="tabla-modelos">
         <thead>
@@ -620,7 +640,6 @@
     </div>
 
     <div class="grid-2">
-      <!-- Cláusulas Iniciales -->
       <div>
         <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--text-muted);">Cláusulas Iniciales (Base + Evidencia + Negación de la Consulta):</h4>
         <div class="table-wrapper" style="max-height: 280px;">
@@ -637,7 +656,6 @@
         </div>
       </div>
 
-      <!-- Pasos de Deducción -->
       <div>
         <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--text-muted);">Pasos de Derivación (Pivote y Resolventes):</h4>
         <div class="table-wrapper" style="max-height: 280px;">
@@ -657,28 +675,27 @@
     </div>
   </div>
 
-  <!-- PANEL DE VEREDICTO FINAL / CULPABLE (SOLO VISIBLE AL CONSULTAR) -->
+  <!-- PANEL DE VEREDICTO FINAL / ADAPTADO A LA VARIABLE CONSULTADA (SOLO VISIBLE AL CONSULTAR) -->
   <div class="veredicto-card" id="seccion-veredicto" style="display: none;">
     <div class="veredicto-header">
-      <h2 id="veredicto-titulo">🎯 Veredicto y Diagnóstico del Incidente</h2>
+      <h2 id="veredicto-titulo">🎯 Veredicto y Diagnóstico de la Consulta</h2>
       <span class="badge" id="veredicto-badge" style="font-size: 0.95rem; padding: 8px 16px;">Analizando...</span>
     </div>
 
     <div class="veredicto-body">
       <div id="veredicto-mensaje" style="font-size: 1.15rem; font-weight: 500;"></div>
-      
       <div class="veredicto-highlight" id="veredicto-detalle"></div>
-
       <div id="veredicto-explicacion-tecnica" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 8px;"></div>
+      <div id="veredicto-contexto-culpabilidad" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 0.85rem; color: #94a3b8;"></div>
     </div>
   </div>
 
 </div>
 
-<!-- MOTOR DE INFERENCIA EN JAVASCRIPT -->
+<!-- MOTOR DE LÓGICA E INFERENCIA JAVASCRIPT CON CARGA DINÁMICA -->
 <script>
-// --- MODELO BASE ORIGINAL ---
-const BASE_ORIGINAL = {
+// --- DATOS INICIALES POR DEFECTO (REEMPLAZADOS DINÁMICAMENTE POR JSON EN DISCO) ---
+const BASE_DEFAULT = {
   variables: ["D", "E", "F", "N", "K", "A", "AD", "AE"],
   significados: {
     "D": "Diego tomó la laptop",
@@ -688,58 +705,66 @@ const BASE_ORIGINAL = {
     "K": "Se usó una llave",
     "A": "La alarma se activó",
     "AD": "Diego es una persona autorizada",
-    "AE": "Elena es una persona autorizada"
+    "AE": "Elena es una persona autorizada",
+    "AF": "Fabián es una persona autorizada"
   },
   reglas: [
-    { id: "E1", desc: "Alguien tomó la laptop y fue Diego, Elena o Fabián.", formula: "D | E | F", fnc: [["D", "E", "F"]] },
-    { id: "E2", desc: "Fue una sola persona.", formula: "~(D & E) & ~(D & F) & ~(E & F)", fnc: [["~D", "~E"], ["~D", "~F"], ["~E", "~F"]] },
-    { id: "E3", desc: "Un retiro posterior a las 18:00 activa la alarma.", formula: "N -> A", fnc: [["~N", "A"]] },
-    { id: "E4", desc: "Si se usó llave, el responsable fue Diego o Elena.", formula: "K -> (D | E)", fnc: [["~K", "D", "E"]] },
-    { id: "E5", desc: "Con llave, quien retira debe estar autorizado.", formula: "K -> ((D -> AD) & (E -> AE))", fnc: [["~K", "~D", "AD"], ["~K", "~E", "AE"]] },
-    { id: "E6", desc: "Si la alarma se activó, no se usó llave.", formula: "A -> ~K", fnc: [["~K", "~A"]] },
-    { id: "E7", desc: "Exactamente uno de los tres testimonios es falso.", formula: "exactamente_dos(~D, N, E)", fnc: [["~D", "N"], ["~D", "E"], ["N", "E"], ["D", "~N", "~E"]] },
-    { id: "E8", desc: "La alarma solo se activa después de las 18:00.", formula: "A -> N", fnc: [["~A", "N"]] }
+    { id: "E1", descripcion: "Alguien tomó la laptop y fue Diego, Elena o Fabián.", formula: "D | E | F", fnc: [["D", "E", "F"]] },
+    { id: "E2", descripcion: "Fue una sola persona.", formula: "~(D & E) & ~(D & F) & ~(E & F)", fnc: [["~D", "~E"], ["~D", "~F"], ["~E", "~F"]] },
+    { id: "E3", descripcion: "Un retiro posterior a las 18:00 activa la alarma.", formula: "N -> A", fnc: [["~N", "A"]] },
+    { id: "E4", descripcion: "Si se usó llave, el responsable fue Diego o Elena.", formula: "K -> (D | E)", fnc: [["~K", "D", "E"]] },
+    { id: "E5", descripcion: "Con llave, quien retira debe estar autorizado.", formula: "K -> ((D -> AD) & (E -> AE))", fnc: [["~K", "~D", "AD"], ["~K", "~E", "AE"]] },
+    { id: "E6", descripcion: "Si la alarma se activó, no se usó llave.", formula: "A -> ~K", fnc: [["~K", "~A"]] },
+    { id: "E7", descripcion: "Exactamente uno de los tres testimonios es falso.", formula: "exactamente_dos(~D, N, E)", fnc: [["~D", "N"], ["~D", "E"], ["N", "E"], ["D", "~N", "~E"]] },
+    { id: "E8", descripcion: "La alarma solo se activa después de las 18:00.", formula: "A -> N", fnc: [["~A", "N"]] }
   ]
 };
 
-const CASOS_PREDEFINIDOS = {
-  caso_1: {
+const CASOS_DEFAULT = [
+  {
     id: "caso_1",
     nombre: "Única explicación compatible",
+    proposito: "La alarma y las autorizaciones fijan un único modelo completo.",
     evidencia: ["A", "AD", "AE"],
     consultas: ["F", "D", "E", "N", "K"]
   },
-  caso_2: {
+  {
     id: "caso_2",
     nombre: "Varias explicaciones compatibles",
+    proposito: "La base original permite las explicaciones de Elena y Fabián.",
     evidencia: [],
     consultas: ["E", "F", "D", "N", "K", "E | F", "~N -> E"]
   },
-  caso_3: {
+  {
     id: "caso_3",
     nombre: "Información contradictoria",
+    proposito: "La evidencia K y A contradice la regla A -> ~K.",
     evidencia: ["K", "A"],
     consultas: ["D", "E", "F"]
   },
-  caso_4: {
+  {
     id: "caso_4",
     nombre: "Nueva evidencia cambia la respuesta",
+    proposito: "Agregar K convierte a Elena en responsable demostrada.",
     evidencia: ["K"],
     consultas: ["E", "D", "F", "N", "AE"]
-  },
-  custom: {
-    id: "custom",
-    nombre: "Caso personalizado",
-    evidencia: [],
-    consultas: ["D", "E", "F", "N", "K"]
   }
-};
+];
 
 // --- ESTADO GLOBAL ---
-let baseActual = JSON.parse(JSON.stringify(BASE_ORIGINAL));
+let baseOriginal = JSON.parse(JSON.stringify(BASE_DEFAULT));
+let baseActual = JSON.parse(JSON.stringify(BASE_DEFAULT));
+let casosDisponibles = JSON.parse(JSON.stringify(CASOS_DEFAULT));
+
+// Registro específico de adiciones dinámicas
+let adiciones = {
+  sospechosos: [], // [{ variable, nombre }]
+  reglas: []       // [{ id, descripcion, formula, fnc }]
+};
+
 let casoActual = "caso_1";
-let evidenciaActiva = new Set(CASOS_PREDEFINIDOS.caso_1.evidencia);
-let consultasActivas = [...CASOS_PREDEFINIDOS.caso_1.consultas];
+let evidenciaActiva = new Set(CASOS_DEFAULT[0].evidencia);
+let consultasActivas = [...CASOS_DEFAULT[0].consultas];
 let consultaSeleccionada = "F";
 
 // --- MOTOR DE LÓGICA PROPOSICIONAL ---
@@ -748,15 +773,9 @@ class Literal {
     this.variable = variable;
     this.positivo = positivo;
   }
-  negado() {
-    return new Literal(this.variable, !this.positivo);
-  }
-  toString() {
-    return this.positivo ? this.variable : `~${this.variable}`;
-  }
-  equals(other) {
-    return this.variable === other.variable && this.positivo === other.positivo;
-  }
+  negado() { return new Literal(this.variable, !this.positivo); }
+  toString() { return this.positivo ? this.variable : `~${this.variable}`; }
+  equals(other) { return this.variable === other.variable && this.positivo === other.positivo; }
   static desdeTexto(txt) {
     txt = txt.trim();
     if (txt.startsWith("~") || txt.startsWith("¬")) {
@@ -1100,93 +1119,408 @@ function obtenerClausulasEscenario() {
   return { clausulas, etiquetas };
 }
 
-function diagnosticarCulpabilidad(modelos, consistente, resolucionBase) {
-  let sospechosos = [];
+// --- DIAGNÓSTICO CONTEXTUALIZADO SEGÚN LA VARIABLE CONSULTADA ---
+function diagnosticarConsultaContextual(consulta, estadoConsulta, modelos, consistente, resBase) {
+  consulta = consulta.trim();
+
+  // 1. Detección de Contradicción en la base
+  if (!consistente || resBase.contradiccion) {
+    return {
+      estado: "CONTRADICCION",
+      titulo: "❌ Contradicción (Cláusula Vacía □) / Base Inconsistente",
+      mensaje: `Se derivó la cláusula vacía (□). La base de conocimiento y la evidencia ingresada son contradictorias e incompatibles.`,
+      detalle: `La saturación por resolución produjo la cláusula vacía □. No existe ningún modelo de verdad posible.`,
+      tipo: "danger",
+      contextoCulpable: "La investigación está bloqueada por información contradictoria."
+    };
+  }
+
+  // Lista de sospechosos activos
   let reglaE1 = baseActual.reglas.find(r => r.id === "E1");
+  let listaSospechosos = [];
   if (reglaE1 && reglaE1.fnc && reglaE1.fnc[0]) {
     for (let lit of reglaE1.fnc[0]) {
       let varName = lit.replace("~", "").trim();
-      if (!sospechosos.includes(varName)) sospechosos.push(varName);
+      if (!listaSospechosos.includes(varName)) listaSospechosos.push(varName);
     }
   } else {
-    sospechosos = ["D", "E", "F"].filter(v => baseActual.variables.includes(v));
+    listaSospechosos = ["D", "E", "F"].filter(v => baseActual.variables.includes(v));
   }
 
-  if (!consistente || resolucionBase.contradiccion) {
-    return {
-      estado: "CONTRADICCION",
-      titulo: "❌ Contradicción / Base Inconsistente",
-      mensaje: "Se derivó la cláusula vacía (□). La base de conocimiento y/o la evidencia ingresada contiene contradicciones lógicas incompatibles.",
-      detalle: "La base de datos es inconsistente y falta información coherente.",
-      tipo: "danger",
-      culpables: []
-    };
-  }
-
-  let posibles = [];
-  let demostrados = [];
-  let descartados = [];
-
-  for (let s of sospechosos) {
+  // Identificar posibles culpables globales para el contexto
+  let demostradosGlobales = [];
+  let posiblesGlobales = [];
+  for (let s of listaSospechosos) {
     let valores = modelos.map(m => !!m[s]);
-    if (valores.every(v => v === true)) {
-      demostrados.push(s);
-    } else if (valores.some(v => v === true)) {
-      posibles.push(s);
+    if (valores.every(v => v === true)) demostradosGlobales.push(s);
+    else if (valores.some(v => v === true)) posiblesGlobales.push(s);
+  }
+
+  let textoContexto = "";
+  if (demostradosGlobales.length === 1) {
+    textoContexto = `Estado global del caso: Se encontró un único culpable demostrado (${baseActual.significados[demostradosGlobales[0]] || demostradosGlobales[0]}).`;
+  } else if (posiblesGlobales.length > 1) {
+    let noms = posiblesGlobales.map(s => `${baseActual.significados[s] || s} (${s})`).join(", ");
+    textoContexto = `Estado global del caso: Existen ${posiblesGlobales.length} posibles soluciones sin poder aislar a un culpable único (${noms}).`;
+  } else {
+    textoContexto = "Estado global del caso: Sin culpables identificables con la información actual.";
+  }
+
+  // A. Consulta sobre un sospechoso
+  let esSospechoso = listaSospechosos.includes(consulta) || (baseActual.significados[consulta] && baseActual.significados[consulta].toLowerCase().includes("tomó la laptop"));
+  if (esSospechoso) {
+    let nombre = baseActual.significados[consulta] || consulta;
+    if (estadoConsulta === "DEMOSTRADA") {
+      return {
+        estado: "CULPABLE_ENCONTRADO",
+        titulo: `🚨 Culpable Encontrado: ${nombre}`,
+        mensaje: `La base de conocimiento es consistente y se demostró con certeza que ${nombre} (${consulta}) tomó la laptop.`,
+        detalle: `La variable ${consulta} es verdadera en el 100% de los modelos compatibles (KB ⊨ ${consulta}). La suposición de inocencia (~${consulta}) derivó en contradicción (□). Los demás sospechosos fueron formalmente descartados.`,
+        tipo: "success",
+        contextoCulpable: textoContexto
+      };
+    } else if (estadoConsulta === "REFUTADA") {
+      return {
+        estado: "SOSPECHOSO_DESCARTADO",
+        titulo: `🛡️ Sospechoso Descartado / Inocente: ${nombre}`,
+        mensaje: `La base de conocimiento es consistente y se demostró que ${nombre} (${consulta}) NO tomó la laptop.`,
+        detalle: `La variable ${consulta} es falsa en todos los modelos compatibles (KB ⊨ ~${consulta}). Queda formalmente descartado de la autoría del incidente.`,
+        tipo: "accent",
+        contextoCulpable: textoContexto
+      };
     } else {
-      descartados.push(s);
+      return {
+        estado: "SOSPECHOSO_INDETERMINADO",
+        titulo: `⚠️ Sospechoso Indeterminado: ${nombre}`,
+        mensaje: `La base de conocimiento es consistente, pero la autoría de ${nombre} (${consulta}) es INDETERMINADA (no es posible confirmarlo ni descartarlo).`,
+        detalle: `Existen modelos compatibles donde ${consulta} es culpable y otros donde es inocente. El caso llega a múltiples posibles soluciones (${posiblesGlobales.join(" vs ")}). Falta información o evidencia para discernir.`,
+        tipo: "warning",
+        contextoCulpable: textoContexto
+      };
     }
   }
 
-  if (demostrados.length === 1) {
-    let s = demostrados[0];
-    let nombre = baseActual.significados[s] || s;
+  // B. Consulta sobre Alarma (A)
+  if (consulta === "A") {
+    if (estadoConsulta === "DEMOSTRADA") {
+      return {
+        estado: "ALARMA_ACTIVADA",
+        titulo: `🚨 Alarma: SE ACTIVÓ`,
+        mensaje: `La base de conocimiento y la evidencia demuestran con certeza que la alarma SE ACTIVÓ en el laboratorio (A = Verdadero).`,
+        detalle: `Consecuencia lógica demostrada (KB ⊨ A). Se activaron los sistemas sonoros de advertencia.`,
+        tipo: "success",
+        contextoCulpable: textoContexto
+      };
+    } else if (estadoConsulta === "REFUTADA") {
+      return {
+        estado: "ALARMA_NO_ACTIVADA",
+        titulo: `🔕 Alarma: NO SE ACTIVÓ`,
+        mensaje: `La base de conocimiento y la evidencia demuestran que la alarma NO SE ACTIVÓ (A = Falso).`,
+        detalle: `Consecuencia lógica demostrada (KB ⊨ ~A). El retiro de la laptop ocurrió en silencio sin disparar el sensor.`,
+        tipo: "accent",
+        contextoCulpable: textoContexto
+      };
+    } else {
+      return {
+        estado: "ALARMA_INDETERMINADA",
+        titulo: `⚠️ Alarma: ESTADO INDETERMINADO`,
+        mensaje: `La base de conocimiento es consistente, pero el estado de la alarma es INDETERMINADO (no es posible saber si sonó o no).`,
+        detalle: `Existen escenarios válidos donde la alarma se activó y otros donde permaneció apagada. Se requiere mayor información temporal o de acceso.`,
+        tipo: "warning",
+        contextoCulpable: textoContexto
+      };
+    }
+  }
+
+  // C. Consulta sobre Llave (K)
+  if (consulta === "K") {
+    if (estadoConsulta === "DEMOSTRADA") {
+      return {
+        estado: "LLAVE_USADA",
+        titulo: `🔑 Llave: SE USÓ UNA LLAVE`,
+        mensaje: `La base de conocimiento y la evidencia demuestran formalmente que SE USÓ UNA LLAVE física (K = Verdadero).`,
+        detalle: `Consecuencia lógica demostrada (KB ⊨ K). El acceso fue con llave, lo cual exige que el autor estuviese autorizado.`,
+        tipo: "success",
+        contextoCulpable: textoContexto
+      };
+    } else if (estadoConsulta === "REFUTADA") {
+      return {
+        estado: "LLAVE_NO_USADA",
+        titulo: `🚫 Llave: NO SE USÓ LLAVE`,
+        mensaje: `La base de conocimiento y la evidencia demuestran que NO SE USÓ LLAVE (K = Falso).`,
+        detalle: `Consecuencia lógica demostrada (KB ⊨ ~K). El acceso se produjo sin llave física (por ejemplo, por regla A → ~K).`,
+        tipo: "accent",
+        contextoCulpable: textoContexto
+      };
+    } else {
+      return {
+        estado: "LLAVE_INDETERMINADA",
+        titulo: `⚠️ Llave: USO INDETERMINADO`,
+        mensaje: `La base de conocimiento es consistente, pero el uso de llave es INDETERMINADO (no se puede confirmar ni descartar).`,
+        detalle: `Existen modelos compatibles con llave (K) y modelos sin llave (~K). Falta evidencia física sobre la cerradura.`,
+        tipo: "warning",
+        contextoCulpable: textoContexto
+      };
+    }
+  }
+
+  // D. Consulta sobre Horario (N)
+  if (consulta === "N") {
+    if (estadoConsulta === "DEMOSTRADA") {
+      return {
+        estado: "HORARIO_NOCHE",
+        titulo: `🌙 Horario: Ocurrió DESPUÉS de las 18:00`,
+        mensaje: `Se demostró que la laptop fue tomada DESPUÉS de las 18:00 (N = Verdadero).`,
+        detalle: `El retiro se efectuó en horario nocturno, activando las condiciones correspondientes.`,
+        tipo: "success",
+        contextoCulpable: textoContexto
+      };
+    } else if (estadoConsulta === "REFUTADA") {
+      return {
+        estado: "HORARIO_DIA",
+        titulo: `☀️ Horario: Ocurrió ANTES o a las 18:00`,
+        mensaje: `Se demostró que la laptop fue tomada ANTES o a las 18:00 (N = Falso).`,
+        detalle: `El incidente ocurrió en horario laboral regular diurno.`,
+        tipo: "accent",
+        contextoCulpable: textoContexto
+      };
+    } else {
+      return {
+        estado: "HORARIO_INDETERMINADO",
+        titulo: `⚠️ Horario: INDETERMINADO`,
+        mensaje: `El horario del retiro de la laptop es INDETERMINADO.`,
+        detalle: `Falta información de bitácora para determinar si ocurrió antes o después de las 18:00.`,
+        tipo: "warning",
+        contextoCulpable: textoContexto
+      };
+    }
+  }
+
+  // E. Consulta sobre Autorizaciones (AD, AE o similares)
+  if (consulta === "AD" || consulta === "AE" || (baseActual.significados[consulta] && baseActual.significados[consulta].toLowerCase().includes("autorizada"))) {
+    let desc = baseActual.significados[consulta] || `Autorización ${consulta}`;
+    if (estadoConsulta === "DEMOSTRADA") {
+      return {
+        estado: "AUTORIZADO",
+        titulo: `✅ Autorización: PERSONA AUTORIZADA`,
+        mensaje: `Se demostró formalmente que la persona ESTÁ AUTORIZADA (${consulta} = Verdadero).`,
+        detalle: desc,
+        tipo: "success",
+        contextoCulpable: textoContexto
+      };
+    } else if (estadoConsulta === "REFUTADA") {
+      return {
+        estado: "NO_AUTORIZADO",
+        titulo: `❌ Autorización: PERSONA NO AUTORIZADA`,
+        mensaje: `Se demostró que la persona NO ESTÁ AUTORIZADA (${consulta} = Falso).`,
+        detalle: desc,
+        tipo: "accent",
+        contextoCulpable: textoContexto
+      };
+    } else {
+      return {
+        estado: "AUTORIZACION_INDETERMINADA",
+        titulo: `⚠️ Autorización: ESTADO INDETERMINADO`,
+        mensaje: `La condición de autorización es INDETERMINADA (${consulta}).`,
+        detalle: "Faltan registros de credenciales para comprobar la autorización.",
+        tipo: "warning",
+        contextoCulpable: textoContexto
+      };
+    }
+  }
+
+  // F. Consulta sobre fórmula general / compuesta
+  if (estadoConsulta === "DEMOSTRADA") {
     return {
-      estado: "CULPABLE_ENCONTRADO",
-      titulo: "✅ Base Consistente — Culpable Encontrado",
-      mensaje: `La base de conocimiento es consistente y se encontró un culpable: ${nombre} (${s}).`,
-      detalle: `Sospechoso identificado con certeza matemática: ${s}. Los demás sospechosos (${descartados.join(", ") || "ninguno"}) fueron formalmente descartados (REFUTADOS).`,
+      estado: "FORMULA_DEMOSTRADA",
+      titulo: `✅ Consulta Demostrada: ${consulta}`,
+      mensaje: `La proposición "${consulta}" es una consecuencia lógica garantizada de la base (KB ⊨ ${consulta}).`,
+      detalle: `Es evaluada como VERDADERA en el 100% de los modelos compatibles de la enumeración y su negación deriva en contradicción por resolución.`,
       tipo: "success",
-      culpables: [s]
+      contextoCulpable: textoContexto
     };
-  } else if (posibles.length > 1) {
-    let nombres = posibles.map(p => `${baseActual.significados[p] || p} (${p})`);
+  } else if (estadoConsulta === "REFUTADA") {
     return {
-      estado: "MULTIPLES_SOLUCIONES",
-      titulo: "⚠️ Base Consistente — Sin Culpable Único (Múltiples Soluciones)",
-      mensaje: `La base de conocimiento es consistente y no es posible encontrar un culpable único (el estado de la base llega a ${posibles.length} posibles soluciones: ${nombres.join(", ")}).`,
-      detalle: `Existen explicaciones compatibles simultáneas. Falta información o evidencia para discernir entre los sospechosos activos (${posibles.join(" vs ")}).`,
-      tipo: "warning",
-      culpables: posibles
-    };
-  } else if (posibles.length === 1 && demostrados.length === 0) {
-    let s = posibles[0];
-    let nombre = baseActual.significados[s] || s;
-    return {
-      estado: "CULPABLE_ENCONTRADO",
-      titulo: "✅ Base Consistente — Culpable por Exclusión",
-      mensaje: `La base de conocimiento es consistente y se determinó el culpable por exclusión: ${nombre} (${s}).`,
-      detalle: `Todos los demás sospechosos fueron refutados, restando únicamente ${s}.`,
-      tipo: "success",
-      culpables: [s]
+      estado: "FORMULA_REFUTADA",
+      titulo: `❌ Consulta Refutada: ${consulta}`,
+      mensaje: `La proposición "${consulta}" ha sido REFUTADA (KB ⊨ ~(${consulta})).`,
+      detalle: `Es FALSA en todos los modelos compatibles de la base de conocimientos.`,
+      tipo: "accent",
+      contextoCulpable: textoContexto
     };
   } else {
     return {
-      estado: "FALTA_INFORMACION",
-      titulo: "ℹ️ Falta de Información",
-      mensaje: "La base es consistente pero no hay suficientes restricciones para imputar la autoría a ningún sospechoso.",
-      detalle: "Se requiere incorporar reglas o evidencias adicionales para avanzar en la deducción.",
+      estado: "FORMULA_INDETERMINADA",
+      titulo: `⚠️ Consulta Indeterminada: ${consulta}`,
+      mensaje: `La proposición "${consulta}" es INDETERMINADA con la información actual.`,
+      detalle: `Es verdadera en algunas asignaciones compatibles y falsa en otras. Se requiere evidencia adicional para fijar su valor de verdad.`,
       tipo: "warning",
-      culpables: []
+      contextoCulpable: textoContexto
     };
   }
 }
 
-// --- RENDERS UI ---
+// --- GESTIÓN DE DICCIONARIO DE VARIABLES Y REGLAS ---
+function normalizarBase(base) {
+  if (!base) return base;
+  if (!base.variables) base.variables = [];
+  if (!base.significados) base.significados = {};
+  if (!base.reglas) base.reglas = [];
+  return base;
+}
+
+function obtenerTodasLasVariables(base) {
+  if (!base) return [];
+  let s = new Set();
+  if (Array.isArray(base.variables)) {
+    base.variables.forEach(v => s.add(v));
+  }
+  if (base.significados && typeof base.significados === "object") {
+    Object.keys(base.significados).forEach(v => s.add(v));
+  }
+  if (Array.isArray(base.reglas)) {
+    for (let r of base.reglas) {
+      if (r && Array.isArray(r.fnc)) {
+        for (let c of r.fnc) {
+          for (let lit of c) {
+            let v = lit.replace(/^[~¬]/, '').trim();
+            if (v) s.add(v);
+          }
+        }
+      }
+    }
+  }
+  return Array.from(s);
+}
+
+function clasificarCategoriaVariable(v) {
+  let s = (baseActual.significados && baseActual.significados[v]) || "";
+  let sLower = s.toLowerCase();
+  if (["D", "E", "F"].includes(v) || sLower.includes("tomó la laptop")) return "Sospechoso";
+  if (v === "A" || sLower.includes("alarma")) return "Alarma (Sensor)";
+  if (v === "K" || sLower.includes("llave")) return "Llave (Acceso físico)";
+  if (v === "N" || sLower.includes("18:00") || sLower.includes("después")) return "Horario temporal";
+  if ((v.startsWith("A") && v.length >= 2) || sLower.includes("autorizad")) return "Autorización";
+  return "Variable proposicional";
+}
+
+function renderizarDiccionario() {
+  normalizarBase(baseActual);
+  normalizarBase(baseOriginal);
+
+  // 1. Tabla de Variables (colecciona variables de baseActual.variables, significados y reglas)
+  let tVars = document.getElementById("tabla-variables-body");
+  tVars.innerHTML = "";
+
+  let todasLasVars = obtenerTodasLasVariables(baseActual);
+
+  for (let v of todasLasVars) {
+    let esAñadida = adiciones.sospechosos.some(s => s.variable === v) || 
+      (baseOriginal.variables && !baseOriginal.variables.includes(v) && !(baseOriginal.significados && baseOriginal.significados[v]));
+    
+    let badgeOrigen = esAñadida
+      ? `<span class="badge badge-purple" style="font-size: 0.7rem;">Añadida</span>`
+      : `<span class="badge badge-accent" style="font-size: 0.7rem;">Original</span>`;
+    
+    let categoria = clasificarCategoriaVariable(v);
+    let desc = (baseActual.significados && baseActual.significados[v]) || `Variable ${v}`;
+
+    tVars.innerHTML += `
+      <tr>
+        <td class="mono" style="font-weight: 700; color: #fff;">${v}</td>
+        <td>${desc}</td>
+        <td style="color: var(--text-muted); font-size: 0.8rem;">${categoria}</td>
+        <td>${badgeOrigen}</td>
+      </tr>
+    `;
+  }
+
+  // 2. Tabla de Reglas
+  let tReglas = document.getElementById("tabla-reglas-body");
+  tReglas.innerHTML = "";
+
+  for (let r of (baseActual.reglas || [])) {
+    let esAñadida = adiciones.reglas.some(ar => ar.id === r.id) ||
+      (baseOriginal.reglas && !baseOriginal.reglas.some(br => br.id === r.id));
+    let esModificada = ["E1", "E2"].includes(r.id) && adiciones.sospechosos.length > 0;
+    
+    let badgeOrigen = "";
+    if (esAñadida) {
+      badgeOrigen = `<span class="badge badge-purple" style="font-size: 0.7rem;">Añadida</span>`;
+    } else if (esModificada) {
+      badgeOrigen = `<span class="badge badge-warning" style="font-size: 0.7rem;">Actualizada</span>`;
+    } else {
+      badgeOrigen = `<span class="badge badge-accent" style="font-size: 0.7rem;">Original</span>`;
+    }
+
+    let fncTexto = Array.isArray(r.fnc) ? r.fnc.map(c => c.join(" ∨ ")).join("<br>") : "";
+
+    tReglas.innerHTML += `
+      <tr>
+        <td class="mono" style="font-weight: 700; color: var(--accent);">${r.id}</td>
+        <td>${r.descripcion || r.desc || ""}</td>
+        <td class="mono" style="font-size: 0.8rem;">${r.formula || ""}</td>
+        <td class="mono" style="font-size: 0.8rem; color: #cbd5e1;">${fncTexto}</td>
+        <td>${badgeOrigen}</td>
+      </tr>
+    `;
+  }
+}
+
+function cambiarTabDiccionario(tab) {
+  document.getElementById("tab-btn-vars").classList.toggle("active", tab === "vars");
+  document.getElementById("tab-btn-reglas").classList.toggle("active", tab === "reglas");
+  document.getElementById("tab-contenido-vars").style.display = tab === "vars" ? "block" : "none";
+  document.getElementById("tab-contenido-reglas").style.display = tab === "reglas" ? "block" : "none";
+}
+
+// --- RENDERIZADO DE CASOS QUEMADOS Y UI ---
+function renderizarCasosQuemados() {
+  let cont = document.getElementById("contenedor-casos-quemados");
+  cont.innerHTML = "";
+
+  for (let c of casosDisponibles) {
+    let btn = document.createElement("div");
+    btn.className = `case-btn ${c.id === casoActual ? "active" : ""}`;
+    btn.id = `btn-${c.id}`;
+    btn.onclick = () => seleccionarCaso(c.id);
+
+    let badgeText = `${c.consultas ? c.consultas.length : 0} consultas`;
+    let badgeClass = "badge-accent";
+    if (c.id === "caso_1") { badgeText = "1 Modelo"; badgeClass = "badge-success"; }
+    else if (c.id === "caso_2") { badgeText = "10 Modelos"; badgeClass = "badge-warning"; }
+    else if (c.id === "caso_3") { badgeText = "0 Modelos (□)"; badgeClass = "badge-danger"; }
+    else if (c.id === "caso_4") { badgeText = "2 Modelos"; badgeClass = "badge-success"; }
+
+    btn.innerHTML = `
+      <div class="case-btn-title">
+        <span>${c.nombre}</span>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="case-btn-desc">${c.proposito || "Escenario de prueba predefinido."}</div>
+    `;
+    cont.appendChild(btn);
+  }
+
+  // Botón modo personalizado
+  let btnCustom = document.createElement("div");
+  btnCustom.className = `case-btn ${casoActual === "custom" ? "active" : ""}`;
+  btnCustom.id = "btn-custom";
+  btnCustom.onclick = () => seleccionarCaso("custom");
+  btnCustom.innerHTML = `
+    <div class="case-btn-title">
+      <span>Modo Personalizado</span>
+      <span class="badge badge-purple">Dinámico</span>
+    </div>
+    <div class="case-btn-desc">Permite modificar o añadir evidencia, sospechosos y reglas en vivo.</div>
+  `;
+  cont.appendChild(btnCustom);
+}
 
 function renderizarBadgesBase() {
-  document.getElementById("badge-variables").textContent = `${baseActual.variables.length} Variables`;
-  let totalClausulas = baseActual.reglas.reduce((acc, r) => acc + r.fnc.length, 0);
+  let vars = obtenerTodasLasVariables(baseActual);
+  document.getElementById("badge-variables").textContent = `${vars.length} Variables`;
+  let totalClausulas = (baseActual.reglas || []).reduce((acc, r) => acc + (r.fnc ? r.fnc.length : 0), 0);
   document.getElementById("badge-clausulas").textContent = `${totalClausulas} Cláusulas CNF`;
 }
 
@@ -1195,7 +1529,8 @@ function renderizarEvidenciaChips() {
   contenedor.innerHTML = "";
   
   let sugeridos = ["A", "~A", "K", "~K", "AD", "AE", "D", "E", "F", "N", "~N"];
-  for (let v of baseActual.variables) {
+  let todasVars = obtenerTodasLasVariables(baseActual);
+  for (let v of todasVars) {
     if (!sugeridos.includes(v)) sugeridos.push(v);
   }
 
@@ -1214,7 +1549,11 @@ function renderizarEvidenciaChips() {
 function renderizarSelectorConsultas() {
   let select = document.getElementById("select-consulta");
   select.innerHTML = "";
-  for (let c of consultasActivas) {
+  let todas = new Set([...consultasActivas]);
+  for (let v of obtenerTodasLasVariables(baseActual)) {
+    todas.add(v);
+  }
+  for (let c of todas) {
     let opt = document.createElement("option");
     opt.value = c;
     opt.textContent = c;
@@ -1228,10 +1567,6 @@ function ocultarSeccionesResultado() {
   document.getElementById("seccion-enumeracion").style.display = "none";
   document.getElementById("seccion-refutacion").style.display = "none";
   document.getElementById("seccion-veredicto").style.display = "none";
-
-  let badgeCons = document.getElementById("badge-consistencia");
-  badgeCons.className = "badge badge-warning";
-  badgeCons.textContent = "Esperando consulta (presione Probar)";
 }
 
 function renderizarEnumeracion() {
@@ -1244,11 +1579,12 @@ function renderizarEnumeracion() {
   let contenedorConsultas = document.getElementById("enum-consultas-grid");
   contenedorConsultas.innerHTML = "";
   
-  // Agregar consulta actual si no está en la lista de tarjetas
   let listaMostrar = [...consultasActivas];
   if (!listaMostrar.includes(consultaSeleccionada)) {
     listaMostrar.unshift(consultaSeleccionada);
   }
+
+  let estadoConsultaSeleccionada = "INDETERMINADA";
 
   for (let cText of listaMostrar) {
     let estado = "INDETERMINADA";
@@ -1269,6 +1605,10 @@ function renderizarEnumeracion() {
     } catch (e) {
       estado = "ERROR";
       badgeClass = "badge-danger";
+    }
+
+    if (cText === consultaSeleccionada) {
+      estadoConsultaSeleccionada = estado;
     }
 
     let esActiva = (cText === consultaSeleccionada);
@@ -1325,7 +1665,7 @@ function renderizarEnumeracion() {
     }
   }
 
-  return { modelos, consistente };
+  return { modelos, consistente, estadoConsultaSeleccionada };
 }
 
 function renderizarRefutacion() {
@@ -1394,29 +1734,27 @@ function renderizarRefutacion() {
   return { resBase, refutacion };
 }
 
-function renderizarVeredicto(diagnostico) {
+function renderizarVeredicto(diag) {
   let card = document.getElementById("seccion-veredicto");
-  card.className = `veredicto-card veredicto-${diagnostico.tipo === "success" ? "culpable" : (diagnostico.tipo === "danger" ? "contradiccion" : "multiples")}`;
+  card.className = `veredicto-card veredicto-${diag.tipo === "success" ? "culpable" : (diag.tipo === "danger" ? "contradiccion" : "multiples")}`;
 
-  document.getElementById("veredicto-titulo").innerHTML = diagnostico.titulo;
+  document.getElementById("veredicto-titulo").innerHTML = diag.titulo;
   
   let badge = document.getElementById("veredicto-badge");
-  badge.className = `badge badge-${diagnostico.tipo}`;
-  badge.textContent = diagnostico.estado;
+  badge.className = `badge badge-${diag.tipo}`;
+  badge.textContent = diag.estado;
 
-  document.getElementById("veredicto-mensaje").textContent = diagnostico.mensaje;
-  document.getElementById("veredicto-detalle").textContent = diagnostico.detalle;
+  document.getElementById("veredicto-mensaje").textContent = diag.mensaje;
+  document.getElementById("veredicto-detalle").textContent = diag.detalle;
 
   let tecnica = document.getElementById("veredicto-explicacion-tecnica");
-  if (diagnostico.estado === "CONTRADICCION") {
+  if (diag.estado === "CONTRADICCION") {
     tecnica.innerHTML = "<strong>Demostración formal:</strong> La saturación de la base por el algoritmo de resolución derivó la cláusula vacía <code>□</code>. Ninguna asignación de verdad satisface el conjunto de cláusulas.";
-  } else if (diagnostico.estado === "CULPABLE_ENCONTRADO") {
-    tecnica.innerHTML = `<strong>Demostración formal:</strong> La variable <code>${diagnostico.culpables[0]}</code> es verdadera en el 100% de los modelos compatibles de la enumeración ($KB \\models ${diagnostico.culpables[0]}$), y su negación $\\sim ${diagnostico.culpables[0]}$ deriva en contradicción por refutación.`;
-  } else if (diagnostico.estado === "MULTIPLES_SOLUCIONES") {
-    tecnica.innerHTML = `<strong>Demostración formal:</strong> Las variables sospechosas <code>${diagnostico.culpables.join(", ")}</code> son evaluadas como <em>INDETERMINADAS</em> (verdaderas en algunos modelos y falsas en otros). La disyunción ${diagnostico.culpables.join(" ∨ ")} está demostrada, pero no es posible aislar a un culpable único sin más evidencia.`;
   } else {
-    tecnica.innerHTML = "";
+    tecnica.innerHTML = `<strong>Demostración formal:</strong> Evaluación exhaustiva sobre los modelos compatibles y prueba de refutación para <code>${consultaSeleccionada}</code>.`;
   }
+
+  document.getElementById("veredicto-contexto-culpabilidad").textContent = diag.contextoCulpable || "";
 }
 
 // --- FUNCIÓN PRINCIPAL DE EJECUCIÓN AL PRESIONAR "PROBAR" ---
@@ -1434,23 +1772,16 @@ function ejecutarConsulta() {
   document.getElementById("seccion-veredicto").style.display = "flex";
 
   // 2. Ejecutar inferencias
-  const { modelos, consistente } = renderizarEnumeracion();
+  const { modelos, consistente, estadoConsultaSeleccionada } = renderizarEnumeracion();
   const { resBase } = renderizarRefutacion();
-  const diagnostico = diagnosticarCulpabilidad(modelos, consistente, resBase);
+  
+  // 3. Diagnóstico adaptado a la variable consultada
+  const diag = diagnosticarConsultaContextual(consultaSeleccionada, estadoConsultaSeleccionada, modelos, consistente, resBase);
 
-  // 3. Renderizar veredicto y actualizar badges
-  renderizarVeredicto(diagnostico);
+  // 4. Renderizar veredicto
+  renderizarVeredicto(diag);
 
-  let badgeCons = document.getElementById("badge-consistencia");
-  if (consistente) {
-    badgeCons.className = "badge badge-success";
-    badgeCons.textContent = `Consistente (${modelos.length} mod)`;
-  } else {
-    badgeCons.className = "badge badge-danger";
-    badgeCons.textContent = "Inconsistente (□)";
-  }
-
-  // 4. Desplazar suavemente hacia el veredicto
+  // 5. Desplazar suavemente hacia el veredicto
   document.getElementById("seccion-veredicto").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
@@ -1458,19 +1789,23 @@ function ejecutarConsulta() {
 function seleccionarCaso(id) {
   casoActual = id;
   document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
-  let btn = document.getElementById(`btn-${id.replace("_", "-")}`);
+  let btn = document.getElementById(`btn-${id}`);
   if (btn) btn.classList.add("active");
 
-  let c = CASOS_PREDEFINIDOS[id];
-  evidenciaActiva = new Set(c.evidencia);
-  consultasActivas = [...c.consultas];
-  consultaSeleccionada = consultasActivas[0] || "D";
+  if (id === "custom") {
+    // Mantener la evidencia actual en modo custom
+  } else {
+    let c = casosDisponibles.find(x => x.id === id);
+    if (c) {
+      evidenciaActiva = new Set(c.evidencia);
+      consultasActivas = [...c.consultas];
+      consultaSeleccionada = consultasActivas[0] || "D";
+    }
+  }
 
   renderizarEvidenciaChips();
   renderizarSelectorConsultas();
   renderizarBadgesBase();
-
-  // Ocultar resultados hasta que el usuario presione "Probar"
   ocultarSeccionesResultado();
 }
 
@@ -1488,8 +1823,10 @@ function toggleEvidencia(lit) {
     evidenciaActiva.add(lit);
   }
   document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("btn-caso-custom").classList.add("active");
-  
+  let btnCust = document.getElementById("btn-custom");
+  if (btnCust) btnCust.classList.add("active");
+  casoActual = "custom";
+
   renderizarEvidenciaChips();
   ocultarSeccionesResultado();
 }
@@ -1499,9 +1836,12 @@ function aplicarEvidenciaCustom() {
   if (!val) return;
   let partes = val.split(",").map(p => p.trim()).filter(p => p.length > 0);
   evidenciaActiva = new Set(partes);
-  document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("btn-caso-custom").classList.add("active");
   
+  document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
+  let btnCust = document.getElementById("btn-custom");
+  if (btnCust) btnCust.classList.add("active");
+  casoActual = "custom";
+
   renderizarEvidenciaChips();
   ocultarSeccionesResultado();
 }
@@ -1521,14 +1861,13 @@ function agregarSospechosoClick() {
     alert("Por favor ingrese la letra de variable y el nombre del sospechoso.");
     return;
   }
-  if (!/^[A-Z][A-Z0-9_]*$/.test(v)) {
-    alert(`Nombre de variable inválido: '${v}'. Debe empezar con una letra y usar solo letras, dígitos o guion bajo.`);
+  if (baseActual.variables.includes(v)) {
+    alert(`La variable '${v}' ya existe en la base.`);
     return;
   }
-  if (baseActual.variables.some(x => x.toUpperCase() === v)) {
-    alert(`La variable '${v}' ya existe en la base. Elija otro nombre para el sospechoso.`);
-    return;
-  }
+
+  // Registrar adición
+  adiciones.sospechosos.push({ variable: v, nombre: nom });
 
   baseActual.variables.push(v);
   baseActual.significados[v] = nom.toLowerCase().includes("laptop") ? nom : `${nom} tomó la laptop`;
@@ -1543,7 +1882,7 @@ function agregarSospechosoClick() {
 
     rE1.fnc = [sospechosos];
     rE1.formula = sospechosos.join(" | ");
-    rE1.desc = `Alguien tomó la laptop y fue uno de: ${sospechosos.join(", ")}.`;
+    rE1.descripcion = `Alguien tomó la laptop y fue uno de: ${sospechosos.join(", ")}.`;
 
     let rE2 = baseActual.reglas.find(r => r.id === "E2");
     let pares = [];
@@ -1561,14 +1900,17 @@ function agregarSospechosoClick() {
   document.getElementById("input-sospechoso-nombre").value = "";
 
   document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("btn-caso-custom").classList.add("active");
+  let btnCust = document.getElementById("btn-custom");
+  if (btnCust) btnCust.classList.add("active");
+  casoActual = "custom";
 
   renderizarBadgesBase();
   renderizarEvidenciaChips();
   renderizarSelectorConsultas();
+  renderizarDiccionario();
   ocultarSeccionesResultado();
 
-  alert(`¡Sospechoso ${nom} (${v}) añadido con éxito! Haga clic en 'Probar' para evaluar.`);
+  alert(`¡Sospechoso ${nom} (${v}) añadido con éxito! Se registró como sospechoso añadido.`);
 }
 
 function agregarReglaClick() {
@@ -1591,16 +1933,6 @@ function agregarReglaClick() {
     let fncStrings = fnc.map(c => c.map(l => l.toString()));
 
     let nuevasVars = extraerVariablesFormula(arbol);
-    let desconocidas = [...nuevasVars].filter(nv => !baseActual.variables.includes(nv));
-    if (desconocidas.length > 0) {
-      let detalle = desconocidas.map(nv => {
-        let parecida = baseActual.variables.find(v => v.toLowerCase() === nv.toLowerCase());
-        return parecida ? `'${nv}' (¿quiso decir '${parecida}'?)` : `'${nv}'`;
-      }).join(", ");
-      if (!confirm(`La regla usa variables que no existen en la base: ${detalle}.\n\n¿Desea crearlas como variables nuevas? Cancele si fue un error de escritura.`)) {
-        return;
-      }
-    }
     for (let nv of nuevasVars) {
       if (!baseActual.variables.includes(nv)) {
         baseActual.variables.push(nv);
@@ -1608,25 +1940,31 @@ function agregarReglaClick() {
       }
     }
 
-    baseActual.reglas.push({
+    let nuevaRegla = {
       id,
-      desc: desc || `Regla ${id}`,
+      descripcion: desc || `Regla ${id}`,
       formula,
       fnc: fncStrings
-    });
+    };
+
+    baseActual.reglas.push(nuevaRegla);
+    adiciones.reglas.push(nuevaRegla);
 
     document.getElementById("input-regla-id").value = "";
     document.getElementById("input-regla-desc").value = "";
     document.getElementById("input-regla-formula").value = "";
 
     document.querySelectorAll(".case-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById("btn-caso-custom").classList.add("active");
+    let btnCust = document.getElementById("btn-custom");
+    if (btnCust) btnCust.classList.add("active");
+    casoActual = "custom";
 
     renderizarBadgesBase();
     renderizarEvidenciaChips();
+    renderizarDiccionario();
     ocultarSeccionesResultado();
 
-    alert(`¡Regla ${id} añadida y convertida a FNC (${fncStrings.length} cláusulas) con éxito! Presione 'Probar' para re-evaluar.`);
+    alert(`¡Regla ${id} añadida y convertida a FNC (${fncStrings.length} cláusulas) con éxito! Registrada como regla añadida.`);
   } catch (e) {
     alert(`Error al analizar la fórmula: ${e.message}`);
   }
@@ -1645,13 +1983,126 @@ function validarConsistenciaClick() {
 }
 
 function restablecerBaseOriginal() {
-  baseActual = JSON.parse(JSON.stringify(BASE_ORIGINAL));
-  seleccionarCaso("caso_1");
+  // Limpiar adiciones y restaurar la base original
+  adiciones = { sospechosos: [], reglas: [] };
+  baseActual = JSON.parse(JSON.stringify(baseOriginal));
+
+  renderizarBadgesBase();
+  renderizarDiccionario();
+  seleccionarCaso(casoActual === "custom" ? "caso_1" : casoActual);
+
+  alert("✅ Base de conocimientos restablecida al estado original:\nSe removieron todos los sospechosos y reglas añadidas, y se restauraron las reglas E1 y E2.");
 }
 
-// Inicialización automática: cargar Caso 1 pero mantener resultados ocultos hasta que se presione Probar
+// --- CARGA DINÁMICA DE BASE DE CONOCIMIENTO Y CASOS DE PRUEBA DESDE ARCHIVOS ---
+function aplicarBaseDesdeJson(baseJson, nombreOrigen = "base_conocimiento.json") {
+  if (!baseJson || typeof baseJson !== "object") {
+    alert("El archivo JSON no contiene un formato válido.");
+    return null;
+  }
+  normalizarBase(baseJson);
+
+  baseOriginal = JSON.parse(JSON.stringify(baseJson));
+  baseActual = JSON.parse(JSON.stringify(baseJson));
+  adiciones = { sospechosos: [], reglas: [] };
+
+  const badgeOrigen = document.getElementById("badge-origen-datos");
+  if (badgeOrigen) {
+    badgeOrigen.textContent = nombreOrigen.startsWith("API") ? nombreOrigen : `JSON: ${nombreOrigen}`;
+    badgeOrigen.style.color = "#4ade80";
+  }
+
+  // Actualizar todas las secciones de la interfaz
+  renderizarCasosQuemados();
+  renderizarBadgesBase();
+  renderizarEvidenciaChips();
+  renderizarSelectorConsultas();
+  renderizarDiccionario();
+  ocultarSeccionesResultado();
+  seleccionarCaso(casoActual in CASOS_DEFAULT ? casoActual : "caso_1");
+
+  const todasVars = obtenerTodasLasVariables(baseActual);
+  const cantReglas = baseActual.reglas ? baseActual.reglas.length : 0;
+  return { vars: todasVars.length, reglas: cantReglas };
+}
+
+function cargarJsonDesdeInput(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      let baseJson = data.base || data;
+      if (data.casos && Array.isArray(data.casos)) {
+        casosDisponibles = JSON.parse(JSON.stringify(data.casos));
+      }
+      let res = aplicarBaseDesdeJson(baseJson, file.name);
+      if (res) {
+        alert(`✅ Base de conocimiento cargada con éxito desde ${file.name}:\n\n• ${res.vars} Variables registradas en el Diccionario\n• ${res.reglas} Reglas registradas en el Diccionario\n\nEl Diccionario de Variables y Reglas se ha actualizado correctamente.`);
+      }
+    } catch (err) {
+      alert(`❌ Error al analizar el archivo JSON: ${err.message}`);
+    }
+    event.target.value = "";
+  };
+  reader.onerror = function() {
+    alert("❌ Error al leer el archivo seleccionado.");
+    event.target.value = "";
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+async function recargarDesdeArchivos(mostrarAlerta = false) {
+  let cargado = false;
+  let fuente = "";
+
+  // Intentos de fetch con cache-busting (funciona en servidor HTTP / API)
+  const urlsAProbar = [
+    `/api/datos?_t=${Date.now()}`,
+    `casos_prueba/base_conocimiento.json?_t=${Date.now()}`
+  ];
+
+  for (let url of urlsAProbar) {
+    try {
+      let res = await fetch(url, { cache: "no-store" });
+      if (res.ok) {
+        let data = await res.json();
+        let baseJson = data.base || data;
+        if (data.casos && Array.isArray(data.casos)) {
+          casosDisponibles = JSON.parse(JSON.stringify(data.casos));
+        }
+        fuente = url.startsWith("/api") ? "API en vivo (/api/datos)" : "casos_prueba/base_conocimiento.json";
+        aplicarBaseDesdeJson(baseJson, fuente);
+        cargado = true;
+        break;
+      }
+    } catch (e) {
+      // Ignorar error de fetch en entornos locales file://
+    }
+  }
+
+  if (cargado) {
+    if (mostrarAlerta) {
+      const vars = obtenerTodasLasVariables(baseActual);
+      alert(`✅ ¡Base de conocimiento recargada exitosamente!\n\nFuente: ${fuente}\n• ${vars.length} Variables registradas en el Diccionario\n• ${baseActual.reglas.length} Reglas registradas en el Diccionario\n\nLos cambios en el JSON se han sincronizado.`);
+    }
+    return;
+  }
+
+  // Si fetch no pudo cargar (por ejemplo cuando se abre index.html directamente como archivo local file://)
+  if (mostrarAlerta) {
+    let inputEl = document.getElementById("input-archivo-base");
+    if (inputEl) {
+      inputEl.click();
+    }
+  }
+}
+
+// Inicialización automática
 window.onload = () => {
-  seleccionarCaso("caso_1");
+  recargarDesdeArchivos(false);
 };
 </script>
 

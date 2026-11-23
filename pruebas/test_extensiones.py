@@ -5,6 +5,7 @@ from datos.cargador import (
     agregar_sospechoso,
     cargar_base,
     diagnosticar_culpabilidad,
+    diagnosticar_consulta,
     validar_adicion,
     validar_consistencia,
 )
@@ -137,6 +138,43 @@ class PruebasNuevasFunciones(unittest.TestCase):
         )
         self.assertIn("G", base_mod.variables)
         self.assertTrue(val.consistente)
+
+    def test_diagnosticar_consulta_sospechoso(self):
+        # Caso 1 con evidencia A, AD, AE: F es culpable demostrada, D es descartado
+        diag_f = diagnosticar_consulta(self.base, "F", evidencia=["A", "AD", "AE"])
+        self.assertEqual("SOSPECHOSO", diag_f.tipo_consulta)
+        self.assertEqual("DEMOSTRADA", diag_f.estado)
+        self.assertIn("Culpable Encontrado", diag_f.titulo)
+
+        diag_d = diagnosticar_consulta(self.base, "D", evidencia=["A", "AD", "AE"])
+        self.assertEqual("SOSPECHOSO", diag_d.tipo_consulta)
+        self.assertEqual("REFUTADA", diag_d.estado)
+        self.assertIn("Descartado", diag_d.titulo)
+
+    def test_diagnosticar_consulta_alarma_y_llave(self):
+        # Caso 1: A es evidencia directa (activada), K es refutada (no se usó llave)
+        diag_a = diagnosticar_consulta(self.base, "A", evidencia=["A", "AD", "AE"])
+        self.assertEqual("ALARMA", diag_a.tipo_consulta)
+        self.assertEqual("DEMOSTRADA", diag_a.estado)
+        self.assertIn("Se Activó", diag_a.titulo)
+
+        diag_k = diagnosticar_consulta(self.base, "K", evidencia=["A", "AD", "AE"])
+        self.assertEqual("LLAVE", diag_k.tipo_consulta)
+        self.assertEqual("REFUTADA", diag_k.estado)
+        self.assertIn("No Se Usó", diag_k.titulo)
+
+        # Caso 2 sin evidencia: K es indeterminada
+        diag_k2 = diagnosticar_consulta(self.base, "K", evidencia=[])
+        self.assertEqual("LLAVE", diag_k2.tipo_consulta)
+        self.assertEqual("INDETERMINADA", diag_k2.estado)
+        self.assertIn("Indeterminado", diag_k2.titulo)
+
+    def test_diagnosticar_consulta_contradiccion(self):
+        # Caso 3 con K y A: contradicción directa
+        diag_c = diagnosticar_consulta(self.base, "D", evidencia=["K", "A"])
+        self.assertEqual("CONTRADICCION", diag_c.estado)
+        self.assertTrue(diag_c.clausula_vacia)
+        self.assertIn("Contradicción", diag_c.titulo)
 
 
 if __name__ == "__main__":

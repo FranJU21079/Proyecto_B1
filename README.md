@@ -47,10 +47,13 @@ El módulo `datos.cargador` incorpora las siguientes funciones clave:
 * `agregar_regla(base, identificador, descripcion, formula)`: Parsea una fórmula proposicional arbitraria, la convierte a Forma Normal Conjuntiva (FNC) y la agrega a la base.
 * `validar_consistencia(base, evidencia=(), metodo="ambos")`: Evalúa si la base es consistente o deriva en contradicción (cláusula vacía $\square$).
 * `validar_adicion(base, nuevo_sospechoso=None, nueva_regla=None, evidencia=())`: Agrega sospechosos/reglas y valida inmediatamente la consistencia.
-* `diagnosticar_culpabilidad(base, evidencia=(), sospechosos=None)`: Determina explícitamente:
-  1. Si la base es consistente y se encontró un culpable único (quién fue).
-  2. Si es consistente y no es posible encontrar un culpable único (el estado de la base llega a 2 o más posibles soluciones / indeterminación).
-  3. Si se llega a una contradicción (cláusula vacía $\square$) o la base es inconsistente y falta información coherente.
+* `diagnosticar_culpabilidad(base, evidencia=(), sospechosos=None)`: Determina explícitamente el estado global de autoría (culpable único, múltiples soluciones, contradicción o falta de información).
+* `diagnosticar_consulta(base, consulta, evidencia=(), sospechosos=None)`: Determina el veredicto contextualizado según la naturaleza de la variable consultada:
+  1. Si es sospechoso: Culpable encontrado, Inocente/descartado, Indeterminado o Contradicción.
+  2. Si es alarma ($A$): Se activó, No se activó, Indeterminada o Contradicción.
+  3. Si es llave ($K$): Se usó llave, No se usó llave, Indeterminada o Contradicción.
+  4. Si es horario ($N$): Ocurrió después de las 18:00 o antes/a las 18:00.
+  5. Si es fórmula compuesta: Demostrada, Refutada o Indeterminada.
 
 ## Interfaz Web (`index.html`)
 

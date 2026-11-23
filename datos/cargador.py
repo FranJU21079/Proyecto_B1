@@ -496,3 +496,189 @@ def diagnosticar_culpabilidad(
             clausula_vacia=False,
             detalle_consultas=estados,
         )
+
+
+@dataclass(frozen=True)
+class DiagnosticoConsulta:
+    consulta: str
+    tipo_consulta: str  # SOSPECHOSO, ALARMA, LLAVE, HORARIO, AUTORIZACION, FORMULA
+    estado: str         # DEMOSTRADA, REFUTADA, INDETERMINADA, CONTRADICCION
+    titulo: str
+    mensaje: str
+    detalle: str
+    consistente: bool
+    modelos_compatibles: int
+    clausula_vacia: bool
+
+
+def diagnosticar_consulta(
+    base: BaseConocimiento,
+    consulta: str,
+    evidencia: Iterable[str] = (),
+    sospechosos: Iterable[str] | None = None,
+) -> DiagnosticoConsulta:
+    """Genera un diagnóstico contextualizado según la naturaleza de la variable consultada.
+    
+    - Si es un sospechoso: culpable, descartado/inocente, indeterminado o contradicción.
+    - Si es alarma (A): activada, no activada, indeterminada o contradicción.
+    - Si es llave (K): se usó llave, no se usó, indeterminada o contradicción.
+    - Si es horario (N): después de las 18:00, antes o a las 18:00, o indeterminado.
+    - Si es fórmula general: demostrada, refutada, indeterminada o contradicción.
+    """
+    validacion = validar_consistencia(base, evidencia)
+    consulta_limpia = consulta.strip()
+
+    if not validacion.consistente or validacion.clausula_vacia:
+        return DiagnosticoConsulta(
+            consulta=consulta_limpia,
+            tipo_consulta="CONTRADICCION",
+            estado="CONTRADICCION",
+            titulo="Contradicción (Cláusula Vacía □)",
+            mensaje="Se llega a una contradicción (se derivó la cláusula vacía □). La base de conocimiento es inconsistente y la información es incompatible.",
+            detalle="La base contiene afirmaciones mutuamente excluyentes o reglas contradictorias.",
+            consistente=False,
+            modelos_compatibles=0,
+            clausula_vacia=True,
+        )
+
+    # Identificar sospechosos
+    if sospechosos is None:
+        lista_sospechosos = []
+        regla_e1 = next((r for r in base.reglas if r.identificador == "E1"), None)
+        if regla_e1 and regla_e1.fnc:
+            for lit in regla_e1.fnc[0]:
+                if lit.positivo and lit.variable not in lista_sospechosos:
+                    lista_sospechosos.append(lit.variable)
+        else:
+            for v in ("D", "E", "F"):
+                if v in base.variables:
+                    lista_sospechosos.append(v)
+    else:
+        lista_sospechosos = list(sospechosos)
+
+    clausulas: list[Clausula] = []
+    etiquetas: list[str] = []
+    for regla in base.reglas:
+        for idx, c in enumerate(regla.fnc, start=1):
+            sufijo = f".{idx}" if len(regla.fnc) > 1 else ""
+            clausulas.append(c)
+            etiquetas.append(f"{regla.identificador}{sufijo}")
+    for lit in evidencia:
+        clausulas.append(clausula_desde_textos([lit]))
+        etiquetas.append(f"Evidencia {lit}")
+
+    resultado_resolucion = inferir_por_resolucion(clausulas, [consulta_limpia], etiquetas)
+    estado = resultado_resolucion.consultas[consulta_limpia].estado.value
+
+    # Clasificar el tipo de consulta
+    es_sospechoso = (
+        consulta_limpia in lista_sospechosos
+        or "tomó la laptop" in base.significados.get(consulta_limpia, "").lower()
+    )
+
+    if es_sospechoso:
+        tipo = "SOSPECHOSO"
+        nombre = base.significados.get(consulta_limpia, consulta_limpia)
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = f"Culpable Encontrado: {nombre}"
+            mensaje = f"La base de conocimiento es consistente y se demostró que {nombre} ({consulta_limpia}) tomó la laptop."
+            detalle = f"La variable {consulta_limpia} es verdadera en todos los modelos compatibles. Los demás sospechosos quedan descartados."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = f"Sospechoso Descartado / Inocente: {nombre}"
+            mensaje = f"La base de conocimiento es consistente y se demostró que {nombre} ({consulta_limpia}) NO tomó la laptop."
+            detalle = f"La variable {consulta_limpia} es falsa en todos los modelos compatibles (KB ⊨ ~{consulta_limpia})."
+        else:
+            # Indeterminado
+            diag_culpables = diagnosticar_culpabilidad(base, evidencia, lista_sospechosos)
+            otros = [s for s in diag_culpables.posibles_culpables]
+            titulo = f"Sospechoso Indeterminado: {nombre}"
+            mensaje = f"La base de conocimiento es consistente, pero no es posible confirmar ni descartar a {nombre} ({consulta_limpia}) como culpable."
+            detalle = f"El estado de la base permite múltiples soluciones entre los sospechosos: {', '.join(otros)}. Falta información para determinar al culpable."
+
+    elif consulta_limpia == "A":
+        tipo = "ALARMA"
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = "Alarma: Se Activó"
+            mensaje = "La base de conocimiento es consistente y se demostró que la alarma SE ACTIVÓ (A = Verdadero)."
+            detalle = "El evento provocó la activación de los sistemas de alerta en el laboratorio."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = "Alarma: No Se Activó"
+            mensaje = "La base de conocimiento es consistente y se demostró que la alarma NO SE ACTIVÓ (A = Falso)."
+            detalle = "No se produjo activación de la alarma durante el retiro de la laptop."
+        else:
+            titulo = "Alarma: Estado Indeterminado"
+            mensaje = "La base de conocimiento es consistente, pero el estado de la alarma es INDETERMINADO."
+            detalle = "Existen escenarios compatibles donde la alarma sonó y otros donde no sonó. Falta información."
+
+    elif consulta_limpia == "K":
+        tipo = "LLAVE"
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = "Llave: Se Usó Llave"
+            mensaje = "La base de conocimiento es consistente y se demostró que SE USÓ UNA LLAVE (K = Verdadero)."
+            detalle = "El acceso a la laptop fue realizado mediante llave física."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = "Llave: No Se Usó Llave"
+            mensaje = "La base de conocimiento es consistente y se demostró que NO SE USÓ LLAVE (K = Falso)."
+            detalle = "El incidente ocurrió sin utilización de llave física."
+        else:
+            titulo = "Llave: Uso Indeterminado"
+            mensaje = "La base de conocimiento es consistente, pero el uso de llave es INDETERMINADO."
+            detalle = "No hay suficiente información para determinar si se utilizó una llave física."
+
+    elif consulta_limpia == "N":
+        tipo = "HORARIO"
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = "Horario: Después de las 18:00"
+            mensaje = "Se demostró que la laptop fue tomada DESPUÉS de las 18:00 (N = Verdadero)."
+            detalle = "El retiro ocurrió en horario posterior a las 18:00."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = "Horario: Antes o a las 18:00"
+            mensaje = "Se demostró que la laptop fue tomada ANTES o a las 18:00 (N = Falso)."
+            detalle = "El retiro ocurrió dentro del horario diurno regular."
+        else:
+            titulo = "Horario: Indeterminado"
+            mensaje = "El horario del incidente es INDETERMINADO (falta información)."
+            detalle = "No se puede confirmar si ocurrió antes o después de las 18:00."
+
+    elif consulta_limpia in ("AD", "AE") or "autorizada" in base.significados.get(consulta_limpia, "").lower():
+        tipo = "AUTORIZACION"
+        desc = base.significados.get(consulta_limpia, consulta_limpia)
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = f"Autorización Demostrada: {desc}"
+            mensaje = f"Se demostró que la persona ESTÁ AUTORIZADA ({consulta_limpia} = Verdadero)."
+            detalle = "La condición de autorización está plenamente verificada."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = f"Autorización Refutada: {desc}"
+            mensaje = f"Se demostró que la persona NO ESTÁ AUTORIZADA ({consulta_limpia} = Falso)."
+            detalle = "La persona carece de autorización en este escenario."
+        else:
+            titulo = f"Autorización Indeterminada: {desc}"
+            mensaje = f"La autorización de la persona es INDETERMINADA ({consulta_limpia})."
+            detalle = "Faltan datos en la base para confirmar la autorización."
+
+    else:
+        tipo = "FORMULA"
+        if estado == EstadoConsulta.DEMOSTRADA.value:
+            titulo = f"Consulta Demostrada: {consulta_limpia}"
+            mensaje = f"La expresión '{consulta_limpia}' está DEMOSTRADA (verdadera en todos los modelos compatibles)."
+            detalle = f"KB ⊨ {consulta_limpia}."
+        elif estado == EstadoConsulta.REFUTADA.value:
+            titulo = f"Consulta Refutada: {consulta_limpia}"
+            mensaje = f"La expresión '{consulta_limpia}' está REFUTADA (falsa en todos los modelos compatibles)."
+            detalle = f"KB ⊨ ~({consulta_limpia})."
+        else:
+            titulo = f"Consulta Indeterminada: {consulta_limpia}"
+            mensaje = f"La expresión '{consulta_limpia}' es INDETERMINADA (puede ser verdadera o falsa)."
+            detalle = "Existen asignaciones compatibles que la hacen verdadera y otras que la hacen falsa."
+
+    return DiagnosticoConsulta(
+        consulta=consulta_limpia,
+        tipo_consulta=tipo,
+        estado=estado,
+        titulo=titulo,
+        mensaje=mensaje,
+        detalle=detalle,
+        consistente=True,
+        modelos_compatibles=validacion.total_modelos,
+        clausula_vacia=False,
+    )

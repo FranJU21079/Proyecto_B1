@@ -23,6 +23,7 @@ from datos.cargador import (
     cargar_casos,
     clausulas_del_escenario,
     diagnosticar_culpabilidad,
+    diagnosticar_consulta,
     validar_consistencia,
 )
 from nucleo.cnf import clausula_a_texto
@@ -184,6 +185,9 @@ def _ejecutar_caso(caso: CasoPrueba, args: argparse.Namespace) -> None:
     diagnostico = diagnosticar_culpabilidad(base, evidencia)
     print("\nDIAGNÓSTICO EXPLICITO:")
     print(f"  * {diagnostico.mensaje}")
+    if consultas and (enumeracion is None or enumeracion.consistente):
+        diag_q = diagnosticar_consulta(base, consultas[0], evidencia)
+        print(f"  * Consulta '{consultas[0]}' [{diag_q.tipo_consulta}]: {diag_q.titulo} -> {diag_q.mensaje}")
 
     if (enumeracion and not enumeracion.consistente) or (
         resolucion and not resolucion.consistente
@@ -218,11 +222,47 @@ def _ejecutar_caso(caso: CasoPrueba, args: argparse.Namespace) -> None:
 
 def _iniciar_servidor(puerto: int) -> None:
     directorio = Path(__file__).resolve().parent
+    raiz_casos = directorio / "casos_prueba"
+
     class Manejador(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(directorio), **kwargs)
 
+        def do_GET(self):
+            # Endpoint dinámico que entrega la base de conocimiento y los casos reales en disco
+            ruta_limpia = self.path.split("?")[0].rstrip("/")
+            if ruta_limpia == "/api/datos":
+                import json
+                try:
+                    with (raiz_casos / "base_conocimiento.json").open("r", encoding="utf-8") as f:
+                        base_json = json.load(f)
+                    casos_json = []
+                    for p in sorted(raiz_casos.glob("caso_*.json")):
+                        with p.open("r", encoding="utf-8") as f:
+                            casos_json.append(json.load(f))
+                    payload = json.dumps({"base": base_json, "casos": casos_json}, ensure_ascii=False).encode("utf-8")
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(payload)))
+                    self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(payload)
+                    return
+                except Exception as err:
+                    err_bytes = json.dumps({"error": str(err)}).encode("utf-8")
+                    self.send_response(500)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(err_bytes)))
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(err_bytes)
+                    return
+
+            return super().do_GET()
+
     print(f"Servidor web iniciado en http://localhost:{puerto}/index.html")
+    print(f"API de datos en vivo disponible en http://localhost:{puerto}/api/datos")
     print("Presione Ctrl+C para detener el servidor.")
     with socketserver.TCPServer(("", puerto), Manejador) as httpd:
         try:
