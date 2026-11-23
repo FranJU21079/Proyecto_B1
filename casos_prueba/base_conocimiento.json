@@ -50,8 +50,8 @@
     {
       "id": "E7",
       "descripcion": "Exactamente uno de los tres testimonios es falso.",
-      "formula": "exactamente_dos(~D, N, E)",
-      "fnc": [["~D", "N"], ["~D", "E"], ["N", "E"], ["D", "~N", "~E"]]
+      "formula": "exactamente_dos(~D, N, D)",
+      "fnc": [["~D", "N"], ["D", "N"]]
     },
     {
       "id": "E8",
