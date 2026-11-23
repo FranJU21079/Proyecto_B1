@@ -1,0 +1,9 @@
+{
+  "id": "caso_3",
+  "nombre": "Información contradictoria",
+  "proposito": "La evidencia K y A contradice la regla A -> ~K.",
+  "evidencia": ["K", "A"],
+  "consultas": ["D"],
+  "modelos_esperados": 0,
+  "esperados": {}
+}

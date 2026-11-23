@@ -1,0 +1,15 @@
+{
+  "id": "caso_1",
+  "nombre": "Única explicación compatible",
+  "proposito": "La alarma y las autorizaciones fijan un único modelo completo.",
+  "evidencia": ["A", "AD", "AE"],
+  "consultas": ["D", "E", "F", "N", "K"],
+  "modelos_esperados": 1,
+  "esperados": {
+    "D": "REFUTADA",
+    "E": "REFUTADA",
+    "F": "DEMOSTRADA",
+    "N": "DEMOSTRADA",
+    "K": "REFUTADA"
+  }
+}

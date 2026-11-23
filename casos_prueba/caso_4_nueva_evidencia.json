@@ -1,0 +1,15 @@
+{
+  "id": "caso_4",
+  "nombre": "Nueva evidencia cambia la respuesta",
+  "proposito": "Agregar K convierte a Elena en responsable demostrada.",
+  "evidencia": ["K"],
+  "consultas": ["D", "E", "F", "N", "AE"],
+  "modelos_esperados": 2,
+  "esperados": {
+    "D": "REFUTADA",
+    "E": "DEMOSTRADA",
+    "F": "REFUTADA",
+    "N": "REFUTADA",
+    "AE": "DEMOSTRADA"
+  }
+}

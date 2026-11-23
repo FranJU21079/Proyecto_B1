@@ -1,0 +1,17 @@
+{
+  "id": "caso_2",
+  "nombre": "Varias explicaciones compatibles",
+  "proposito": "La base original permite las explicaciones de Elena y Fabián.",
+  "evidencia": [],
+  "consultas": ["D", "E", "F", "N", "K", "E | F", "~N -> E"],
+  "modelos_esperados": 10,
+  "esperados": {
+    "D": "REFUTADA",
+    "E": "INDETERMINADA",
+    "F": "INDETERMINADA",
+    "N": "INDETERMINADA",
+    "K": "INDETERMINADA",
+    "E | F": "DEMOSTRADA",
+    "~N -> E": "DEMOSTRADA"
+  }
+}
